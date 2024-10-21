@@ -2,6 +2,8 @@ from django.db import models
 from django.utils.text import slugify
 from django.contrib.auth.models import User
 from urllib.parse import urlparse
+from youtube_transcript_api import YouTubeTranscriptApi
+import json
 
 class Course(models.Model):
     course_id = models.AutoField(primary_key=True)
@@ -17,61 +19,6 @@ class Course(models.Model):
     def __str__(self):
         return self.course_name
 
-
-
-# class Article(models.Model):
-#     course_name = models.ForeignKey('Course', on_delete=models.CASCADE)
-#     article_name = models.CharField(max_length=100, unique=True)
-#     slug = models.SlugField(max_length=200, unique=True)
-#     description = models.TextField()
-#     article_video_url = models.URLField(blank=True, null=True)
-#     article_video_thumbnail = models.URLField(blank=True, null=True)
-#     transcript = models.TextField(blank=True, null=True)
-#     subtitles = models.TextField(null=True, blank=True)
-#     hyperlinks = models.ManyToManyField('Hyperlink', related_name='articles', blank=True)
-#     contents = models.ManyToManyField('Content', related_name='articles', blank=True)
-#     quiz = models.ManyToManyField('Quiz', related_name='article_quizzes', blank=True)
-
-#     def get_youtube_video_id(self, url):
-#         """
-#         Extracts YouTube video ID from a URL.
-#         Supports regular, short, and embed YouTube URLs.
-#         """
-#         parsed_url = urlparse(url)
-#         if 'youtube.com' in parsed_url.netloc and 'v=' in parsed_url.query:
-#             return parsed_url.query.split('v=')[1].split('&')[0]
-#         elif 'youtu.be' in parsed_url.netloc:
-#             return parsed_url.path.split('/')[1]
-#         elif 'youtube.com' in parsed_url.netloc and '/embed/' in parsed_url.path:
-#             return parsed_url.path.split('/embed/')[1].split('?')[0]
-#         return None
-
-#     def get_youtube_thumbnail_url(self, video_id):
-#         """
-#         Returns the YouTube thumbnail URL for a given video ID.
-#         """
-#         return f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
-
-#     def save(self, *args, **kwargs):
-#         # Generate slug if it's not provided
-#         if not self.slug:
-#             self.slug = slugify(self.article_name)
-
-#         # If there's a YouTube video URL, generate the thumbnail
-#         if self.article_video_url:
-#             video_id = self.get_youtube_video_id(self.article_video_url)
-#             if video_id:
-#                 self.article_video_thumbnail = self.get_youtube_thumbnail_url(video_id)
-#             else:
-#                 print("Error: Could not extract YouTube video ID from the URL.")
-
-#         super(Article, self).save(*args, **kwargs)
-
-#     def __str__(self):
-#         return self.article_name
-# from urllib.parse import urlparse
-# from django.utils.text import slugify
-# from youtube_transcript_api import YouTubeTranscriptApi
 
 # class Article(models.Model):
 #     course_name = models.ForeignKey('Course', on_delete=models.CASCADE)
@@ -143,11 +90,8 @@ class Course(models.Model):
 
 #     def __str__(self):
 #         return self.article_name
-from django.db import models
-from django.utils.text import slugify
-from urllib.parse import urlparse
-from youtube_transcript_api import YouTubeTranscriptApi
-import json
+
+
 
 class Article(models.Model):
     course_name = models.ForeignKey('Course', on_delete=models.CASCADE)
