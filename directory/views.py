@@ -1,5 +1,5 @@
 from rest_framework import generics
-from .models import Article, Course, Quiz
+from .models import Article, Course, Quiz, VideoTranscript
 from .serializers import ArticleSerializer, CourseSerializer, QuizSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -54,7 +54,14 @@ class QuizListView(generics.ListAPIView):
     def get_queryset(self):
         article_id = self.kwargs['article_id']  # Get article ID from URL
         return Quiz.objects.filter(article_name_id=article_id)  # Filter questions by article ID
-    
+
+from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from urllib.parse import urlparse
+from youtube_transcript_api import YouTubeTranscriptApi
+import json  # Required for serializing transcript
 
 class GenerateSubtitlesView(APIView):
     def get_youtube_video_id(self, url):
@@ -101,4 +108,59 @@ class GenerateSubtitlesView(APIView):
         if "error" in subtitles:
             return Response({"error": subtitles["error"]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response({"subtitles": subtitles}, status=status.HTTP_200_OK)
+        # Save the YouTube URL and transcript in the database
+        video_transcript = VideoTranscript.objects.create(
+            youtube_url=youtube_url,
+            transcript=json.dumps(subtitles)  # Serialize the transcript as JSON
+        )
+
+        # Respond with subtitles
+        return Response({"subtitles": subtitles, "message": "Transcript saved successfully."}, status=status.HTTP_200_OK)
+
+
+# class GenerateSubtitlesView(APIView):
+#     def get_youtube_video_id(self, url):
+#         """
+#         Extracts YouTube video ID from a URL.
+#         Supports regular, short, and embed YouTube URLs.
+#         """
+#         parsed_url = urlparse(url)
+#         if 'youtube.com' in parsed_url.netloc and 'v=' in parsed_url.query:
+#             return parsed_url.query.split('v=')[1].split('&')[0]
+#         elif 'youtu.be' in parsed_url.netloc:
+#             return parsed_url.path.split('/')[1]
+#         elif 'youtube.com' in parsed_url.netloc and '/embed/' in parsed_url.path:
+#             return parsed_url.path.split('/embed/')[1].split('?')[0]
+#         return None
+
+#     def fetch_subtitles(self, video_id):
+#         """
+#         Fetch subtitles using YouTubeTranscriptApi and return them with start and end times.
+#         """
+#         try:
+#             transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
+#             return transcript  # List of subtitle dictionaries with 'start', 'duration', and 'text'
+#         except YouTubeTranscriptApi.CouldNotRetrieveTranscript as e:
+#             return {"error": "Subtitles are disabled or unavailable for this video."}
+#         except YouTubeTranscriptApi.NoTranscriptFound as e:
+#             return {"error": "No transcript found for this video."}
+#         except Exception as e:
+#             return {"error": str(e)}
+
+#     def post(self, request, *args, **kwargs):
+#         youtube_url = request.data.get('url', None)
+
+#         if not youtube_url:
+#             return Response({"error": "No YouTube URL provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # Extract video ID
+#         video_id = self.get_youtube_video_id(youtube_url)
+#         if not video_id:
+#             return Response({"error": "Invalid YouTube URL."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # Fetch subtitles
+#         subtitles = self.fetch_subtitles(video_id)
+#         if "error" in subtitles:
+#             return Response({"error": subtitles["error"]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#         return Response({"subtitles": subtitles}, status=status.HTTP_200_OK)

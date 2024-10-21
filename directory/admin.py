@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Course, Article, Content, VideoPlayer, Quiz, UserPerformance,Hyperlink
+from .models import Course, Article, Content, VideoPlayer, Quiz, UserPerformance,Hyperlink, VideoTranscript
 
 # Customizing admin for the Course model
 class CourseAdmin(admin.ModelAdmin):
@@ -52,3 +52,4 @@ admin.site.register(Content)
 admin.site.register(VideoPlayer, VideoPlayerAdmin)
 admin.site.register(Quiz, QuizAdmin)
 admin.site.register(UserPerformance, UserPerformanceAdmin)
+admin.site.register(VideoTranscript)

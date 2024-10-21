@@ -100,7 +100,6 @@ class Article(models.Model):
     description = models.TextField()
     article_video_url = models.URLField(blank=True, null=True)
     article_video_thumbnail = models.URLField(blank=True, null=True)
-    transcript = models.TextField(blank=True, null=True)
     subtitles = models.JSONField(null=True, blank=True)  # Store subtitles as JSON
     hyperlinks = models.ManyToManyField('Hyperlink', related_name='articles', blank=True)
     contents = models.ManyToManyField('Content', related_name='articles', blank=True)
@@ -235,3 +234,10 @@ class UserPerformance(models.Model):
     def __str__(self):
         return f"Performance of {self.user.username}"
 
+
+class VideoTranscript(models.Model):
+    youtube_url = models.URLField(max_length=255, unique=True)
+    transcript = models.JSONField(null=True, blank=True) 
+
+    def __str__(self):
+        return self.youtube_url
