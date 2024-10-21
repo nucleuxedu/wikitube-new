@@ -1,0 +1,7 @@
+django-backend
+backend/.env
+db.sqlite3
+env-gcp
+directory/models2.py
+downloads
+
