@@ -78,6 +78,10 @@ class GenerateSubtitlesView(APIView):
         try:
             transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
             return transcript  # List of subtitle dictionaries with 'start', 'duration', and 'text'
+        except YouTubeTranscriptApi.CouldNotRetrieveTranscript as e:
+            return {"error": "Subtitles are disabled or unavailable for this video."}
+        except YouTubeTranscriptApi.NoTranscriptFound as e:
+            return {"error": "No transcript found for this video."}
         except Exception as e:
             return {"error": str(e)}
 
