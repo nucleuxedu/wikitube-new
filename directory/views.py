@@ -1,6 +1,6 @@
 from rest_framework import generics
 from .models import Article, Course, Quiz, VideoTranscript
-from .serializers import ArticleSerializer, CourseSerializer, QuizSerializer
+from .serializers import ArticleSerializer, CourseSerializer, QuizSerializer, VideoTranscriptSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -117,6 +117,35 @@ class GenerateSubtitlesView(APIView):
 
         # Respond with subtitles
         return Response({"subtitles": subtitles, "message": "Transcript saved successfully."}, status=status.HTTP_200_OK)
+class VideoTranscriptDetailView(APIView):
+    def get(self, request, *args, **kwargs):
+        youtube_url = request.query_params.get('url', None)
+        if not youtube_url:
+            return Response({"error": "No YouTube URL provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            video_transcript = VideoTranscript.objects.get(youtube_url=youtube_url)
+        except VideoTranscript.DoesNotExist:
+            return Response({"error": "Transcript not found for the provided YouTube URL."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = VideoTranscriptSerializer(video_transcript)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        youtube_url = request.data.get('youtube_url')
+        transcript = request.data.get('transcript')
+
+        if not youtube_url or not transcript:
+            return Response({"error": "Both YouTube URL and transcript are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Save the new transcript
+        video_transcript = VideoTranscript.objects.create(
+            youtube_url=youtube_url,
+            transcript=transcript
+        )
+
+        serializer = VideoTranscriptSerializer(video_transcript)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # from django.http import JsonResponse
 # from rest_framework.views import APIView

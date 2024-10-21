@@ -139,6 +139,14 @@ class ArticleSerializer(serializers.ModelSerializer):
         video_id = video_id_match.group(1) if video_id_match else None
         print(f"Extracted video ID: {video_id}")  # Debug print
         return video_id
+from rest_framework import serializers
+from .models import VideoTranscript
+
+class VideoTranscriptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VideoTranscript
+        fields = ['youtube_url', 'transcript']
+
 
 # import re
 # from youtube_transcript_api import YouTubeTranscriptApi
@@ -239,15 +247,15 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 
 
-# class VideoPlayerSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = VideoPlayer
-#         fields = [
-#             'video_played_id',
-#             'video_title',
-#             'video_description',
-#             'channel_name'
-#         ]
+class VideoPlayerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VideoPlayer
+        fields = [
+            'video_played_id',
+            'video_title',
+            'video_description',
+            'channel_name'
+        ]
 
 
 # class ArticleSerializer(serializers.ModelSerializer):
