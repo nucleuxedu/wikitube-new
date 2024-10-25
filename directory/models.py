@@ -166,6 +166,8 @@ class Article(models.Model):
         if self.subtitles:
             return json.loads(self.subtitles)  # Convert JSON string back to a list of dictionaries
         return []
+    def __str__(self):
+         return self.article_name
 
 
 class Hyperlink(models.Model):
@@ -218,21 +220,56 @@ class Quiz(models.Model):
 
 
 
+# class UserPerformance(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     course = models.ForeignKey(Course, related_name='course',null=True, on_delete=models.CASCADE)
+#     watched_videos = models.ManyToManyField(VideoPlayer)
+
+#     @property
+#     def progress(self):
+#         total_videos = self.course.total_videos
+#         watched_videos_count = self.watched_videos.count()
+#         if total_videos > 0:
+#             return (watched_videos_count / total_videos) * 100
+#         return 0  # If no videos in the course
+
+#     def __str__(self):
+#         return f"Performance of {self.user.username}"
+from django.db import models
+
 class UserPerformance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, related_name='course',null=True, on_delete=models.CASCADE)
-    watched_videos = models.ManyToManyField(VideoPlayer)
+    course = models.ForeignKey(Course, related_name='course', null=True, on_delete=models.CASCADE)
+    watched_videos = models.ManyToManyField(VideoPlayer, blank=True)
+    watched_video_ids = models.TextField(blank=True, null=True, help_text="YouTube video IDs separated by semicolons")
 
     @property
     def progress(self):
-        total_videos = self.course.total_videos
-        watched_videos_count = self.watched_videos.count()
+        total_videos = self.course.total_videos  # Assuming `total_videos` is an attribute of `course`
+        watched_videos_count = len(self.get_watched_video_ids())
         if total_videos > 0:
             return (watched_videos_count / total_videos) * 100
-        return 0  # If no videos in the course
+        return 0
+
+    def get_watched_video_ids(self):
+        """
+        Returns a list of watched video IDs stored in the `watched_video_ids` TextField.
+        """
+        if self.watched_video_ids:
+            return self.watched_video_ids.split(';')
+        return []
+
+    def set_watched_video_ids(self, video_ids_list):
+        """
+        Accepts a list of video IDs and updates the `watched_video_ids` TextField as a semicolon-separated string.
+        """
+        self.watched_video_ids = ';'.join(video_ids_list)
+        self.save(update_fields=['watched_video_ids'])
 
     def __str__(self):
         return f"Performance of {self.user.username}"
+
+
 
 
 class VideoTranscript(models.Model):
