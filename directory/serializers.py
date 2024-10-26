@@ -28,10 +28,11 @@ class UserPerformanceSerializer(serializers.ModelSerializer):
 
 class CourseSerializer(serializers.ModelSerializer):
     user_performance = serializers.SerializerMethodField()  # Custom field for performance
+    articles = serializers.SerializerMethodField()  # Custom field for concatenated article names
 
     class Meta:
         model = Course
-        fields = ['course_id', 'course_name', 'slug', 'total_videos', 'user_performance']
+        fields = ['course_id', 'course_name', 'slug', 'total_videos', 'user_performance', 'articles']
 
     def get_user_performance(self, obj):
         user = self.context.get('user')  # Expecting user in context
@@ -56,6 +57,14 @@ class CourseSerializer(serializers.ModelSerializer):
                     "progress": 50  # Default progress is 50%
                 }
         return None  # Return None if no user is in context
+
+    def get_articles(self, obj):
+        # Retrieve all articles related to the course
+        articles = Article.objects.filter(course_name=obj)
+        # Concatenate article names separated by semicolons
+        article_names = ";".join(article.article_name for article in articles)
+        return article_names
+
 
 class HyperlinkSerializer(serializers.ModelSerializer):
     class Meta:
@@ -250,25 +259,5 @@ class VideoPlayerSerializer(serializers.ModelSerializer):
         ]
 
 
-# class ArticleSerializer(serializers.ModelSerializer):
-#     hyperlinks = HyperlinkSerializer(many=True, read_only=True)
-#     quizzes = QuizSerializer(many=True, read_only=True)
-#     content = ContentSerializer(many=True, read_only=True)  # Add ContentSerializer here
-#     videos = VideoPlayerSerializer(many=True, read_only=True)
 
-#     class Meta:
-#         model = Article
-#         fields = [
-#             'id', 
-#             'course_name', 
-#             'article_name', 
-#             'slug', 
-#             'description', 
-#             'article_video_thumbnail', 
-#             'article_video_url', 
-#             'hyperlinks', 
-#             'quizzes', 
-#             'content' ,
-#             'videos'
-#         ]
         

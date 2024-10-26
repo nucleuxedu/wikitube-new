@@ -219,24 +219,6 @@ class Quiz(models.Model):
 
 
 
-
-# class UserPerformance(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     course = models.ForeignKey(Course, related_name='course',null=True, on_delete=models.CASCADE)
-#     watched_videos = models.ManyToManyField(VideoPlayer)
-
-#     @property
-#     def progress(self):
-#         total_videos = self.course.total_videos
-#         watched_videos_count = self.watched_videos.count()
-#         if total_videos > 0:
-#             return (watched_videos_count / total_videos) * 100
-#         return 0  # If no videos in the course
-
-#     def __str__(self):
-#         return f"Performance of {self.user.username}"
-from django.db import models
-
 class UserPerformance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, related_name='course', null=True, on_delete=models.CASCADE)
