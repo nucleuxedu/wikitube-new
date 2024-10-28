@@ -9,7 +9,7 @@ class Course(models.Model):
     course_id = models.AutoField(primary_key=True)
     course_name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
-    total_videos = models.PositiveIntegerField(null=True)
+    total_videos = models.PositiveIntegerField(null=True,default=0)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -18,80 +18,6 @@ class Course(models.Model):
 
     def __str__(self):
         return self.course_name
-
-
-# class Article(models.Model):
-#     course_name = models.ForeignKey('Course', on_delete=models.CASCADE)
-#     article_name = models.CharField(max_length=100, unique=True)
-#     slug = models.SlugField(max_length=200, unique=True)
-#     description = models.TextField()
-#     article_video_url = models.URLField(blank=True, null=True)
-#     article_video_thumbnail = models.URLField(blank=True, null=True)
-#     transcript = models.TextField(blank=True, null=True)
-#     subtitles = models.TextField(null=True, blank=True)  # Subtitles field
-#     hyperlinks = models.ManyToManyField('Hyperlink', related_name='articles', blank=True)
-#     contents = models.ManyToManyField('Content', related_name='articles', blank=True)
-#     quiz = models.ManyToManyField('Quiz', related_name='article_quizzes', blank=True)
-
-#     def get_youtube_video_id(self, url):
-#         """
-#         Extracts YouTube video ID from a URL.
-#         Supports regular, short, and embed YouTube URLs.
-#         """
-#         parsed_url = urlparse(url)
-#         if 'youtube.com' in parsed_url.netloc and 'v=' in parsed_url.query:
-#             return parsed_url.query.split('v=')[1].split('&')[0]
-#         elif 'youtu.be' in parsed_url.netloc:
-#             return parsed_url.path.split('/')[1]
-#         elif 'youtube.com' in parsed_url.netloc and '/embed/' in parsed_url.path:
-#             return parsed_url.path.split('/embed/')[1].split('?')[0]
-#         return None
-
-#     def get_youtube_thumbnail_url(self, video_id):
-#         """
-#         Returns the YouTube thumbnail URL for a given video ID.
-#         """
-#         return f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
-
-#     def fetch_subtitles(self, video_id):
-#         """
-#         Fetch subtitles using YouTubeTranscriptApi and return them as text.
-#         """
-#         try:
-#             transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
-#             subtitles_text = " ".join([item['text'] for item in transcript])  # Combine the subtitles
-#             return subtitles_text
-#         except Exception as e:
-#             print(f"Error fetching subtitles: {e}")
-#             return None
-
-#     def save(self, *args, **kwargs):
-#         # Generate slug if it's not provided
-#         if not self.slug:
-#             self.slug = slugify(self.article_name)
-
-#         # If there's a YouTube video URL, generate the thumbnail and fetch subtitles
-#         if self.article_video_url:
-#             video_id = self.get_youtube_video_id(self.article_video_url)
-#             if video_id:
-#                 # Set the video thumbnail
-#                 self.article_video_thumbnail = self.get_youtube_thumbnail_url(video_id)
-
-#                 # Fetch and save the subtitles
-#                 subtitles = self.fetch_subtitles(video_id)
-#                 if subtitles:
-#                     self.subtitles = subtitles
-#                 else:
-#                     print("Subtitles could not be fetched.")
-#             else:
-#                 print("Error: Could not extract YouTube video ID from the URL.")
-
-#         super(Article, self).save(*args, **kwargs)
-
-#     def __str__(self):
-#         return self.article_name
-
-
 
 class Article(models.Model):
     course_name = models.ForeignKey('Course', on_delete=models.CASCADE)
@@ -216,9 +142,6 @@ class Quiz(models.Model):
 
     def __str__(self):
         return f"Quiz for {self.article.article_name}"
-
-
-
 class UserPerformance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, related_name='course', null=True, on_delete=models.CASCADE)
@@ -243,16 +166,17 @@ class UserPerformance(models.Model):
 
     def set_watched_video_ids(self, video_ids_list):
         """
-        Accepts a list of video IDs and updates the `watched_video_ids` TextField as a semicolon-separated string.
+        Accepts a list of video IDs and updates the `watched_video_ids` TextField,
+        appending new IDs to existing ones while avoiding duplicates.
         """
-        self.watched_video_ids = ';'.join(video_ids_list)
+        current_ids = set(self.get_watched_video_ids())  # Get current watched video IDs as a set
+        new_ids = set(video_ids_list)  # Get new IDs as a set
+        all_ids = current_ids.union(new_ids)  # Combine sets to avoid duplicates
+        self.watched_video_ids = ';'.join(all_ids)  # Join back to semicolon-separated string
         self.save(update_fields=['watched_video_ids'])
 
     def __str__(self):
         return f"Performance of {self.user.username}"
-
-
-
 
 class VideoTranscript(models.Model):
     youtube_url = models.URLField(max_length=255, unique=True)

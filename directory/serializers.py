@@ -5,27 +5,6 @@ from .models import VideoTranscript
 import re
 from .models import Article
 
-
-
-
-# class CourseSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Course
-#         fields = ['course_id', 'course_name', 'slug']
- 
-
-
-class UserPerformanceSerializer(serializers.ModelSerializer):
-    progress = serializers.SerializerMethodField()
-
-    class Meta:
-        model = UserPerformance
-        fields = ['user', 'watched_videos', 'progress']
-
-    def get_progress(self, obj):
-        return obj.progress
-
-
 class CourseSerializer(serializers.ModelSerializer):
     user_performance = serializers.SerializerMethodField()  # Custom field for performance
     articles = serializers.SerializerMethodField()  # Custom field for concatenated article names
@@ -156,94 +135,39 @@ class VideoTranscriptSerializer(serializers.ModelSerializer):
         fields = ['youtube_url', 'transcript']
 
 
-
-
-# class ArticleSerializer(serializers.ModelSerializer):
-#     hyperlinks = HyperlinkSerializer(many=True, read_only=True)
-#     quizzes = QuizSerializer(many=True, read_only=True)
-#     content = ContentSerializer(many=True, read_only=True)
-#     videos = VideoPlayerSerializer(many=True, read_only=True)
-#     subtitles = serializers.SerializerMethodField()  # Add subtitles as a SerializerMethodField
-
-#     class Meta:
-#         model = Article
-#         fields = [
-#             'id',
-#             'course_name',
-#             'article_name',
-#             'slug',
-#             'description',
-#             'article_video_thumbnail',
-#             'article_video_url',
-#             'subtitles',  # Include subtitles in the fields
-#             'hyperlinks',
-#             'quizzes',
-#             'content',
-#             'videos',
-#         ]
-
-#     def get_subtitles(self, obj):
-#         video_url = obj.article_video_url
-#         video_id = self.extract_video_id(video_url)
-
-#         if not video_id:
-#             print("Error: No video ID found in URL.")
-#             return None
-
-#         try:
-#             # Fetch subtitles using YouTubeTranscriptApi
-#             transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
-#             print(f"Transcript fetched: {transcript}")  # Debug print
-#             return transcript
-#         except Exception as e:
-#             print(f"Error fetching subtitles: {e}")  # Print error message
-#             return None
-
-#     def extract_video_id(self, url):
-#         # Regular expression to extract YouTube video ID
-#         video_id_match = re.search(r"(?:v=|\/)([0-9A-Za-z_-]{11}).*", url)
-#         video_id = video_id_match.group(1) if video_id_match else None
-#         print(f"Extracted video ID: {video_id}")  # Debug print
-#         return video_id
-
-
-
-
-
 class UserPerformanceSerializer(serializers.ModelSerializer):
-    watched_video_ids = serializers.SerializerMethodField()  # Read-only field for display
+    watched_video_ids = serializers.ListField(
+        child=serializers.CharField(), write_only=True, required=False
+    )
+    watched_video_ids_readonly = serializers.SerializerMethodField()  # Read-only calculated field
     progress = serializers.SerializerMethodField()  # Read-only calculated field
 
     class Meta:
         model = UserPerformance
-        fields = ['user', 'course', 'watched_video_ids', 'progress']
+        fields = ['user', 'course', 'watched_video_ids', 'watched_video_ids_readonly', 'progress']
 
     def create(self, validated_data):
-        # Extract watched_video_ids from validated_data
         watched_video_ids = validated_data.pop('watched_video_ids', [])
         performance = UserPerformance(**validated_data)
         performance.save()
-
-        # Save watched video IDs using the set_watched_video_ids method
         performance.set_watched_video_ids(watched_video_ids)
         return performance
 
     def update(self, instance, validated_data):
         watched_video_ids = validated_data.pop('watched_video_ids', None)
-        
-        # Update watched_video_ids if provided
+
         if watched_video_ids is not None:
             instance.set_watched_video_ids(watched_video_ids)
         instance.save()
         return instance
 
-    def get_watched_video_ids(self, obj):
-        # Retrieve watched video IDs using the model method
+    def get_watched_video_ids_readonly(self, obj):
         return obj.get_watched_video_ids()
-
     def get_progress(self, obj):
-        # Calculate and return progress
-        return obj.progress
+    
+        total_videos = obj.course.total_videos  
+        watched_videos = len(obj.get_watched_video_ids())
+        return (watched_videos / total_videos) * 100 if total_videos > 0 else 0
 
 
 
