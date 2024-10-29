@@ -157,3 +157,8 @@ def password_reset_confirm(request, uidb64, token):
         return Response({'message': 'Password reset successful'}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# Get User ID (Protected Route)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_id(request):
+    return Response({'user_id': request.user.id}, status=status.HTTP_200_OK)
