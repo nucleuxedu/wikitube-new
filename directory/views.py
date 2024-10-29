@@ -11,6 +11,9 @@ from youtube_transcript_api import YouTubeTranscriptApi
 import json
 from youtube_transcript_api._errors import NoTranscriptFound, TranscriptsDisabled, VideoUnavailable
 from .models import VideoTranscript,UserPerformance
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+
 
 
 
@@ -182,3 +185,15 @@ class UserPerformanceDetailView(generics.RetrieveUpdateAPIView):
         self.perform_update(serializer)
         return Response(serializer.data)
 
+
+
+class UserPerformanceViewSet(viewsets.ModelViewSet):
+    serializer_class = UserPerformanceSerializer
+    queryset = UserPerformance.objects.all()
+
+    @action(detail=True, methods=['post'], url_path='delete-watched-ids')
+    def delete_watched_video_ids(self, request, pk=None):
+        instance = self.get_object()
+        video_ids_to_remove = request.data.get('watched_video_ids', [])
+        instance.remove_watched_video_ids(video_ids_to_remove)
+        return Response({"message": "Watched video IDs deleted successfully."}, status=status.HTTP_200_OK)

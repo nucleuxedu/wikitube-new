@@ -174,6 +174,12 @@ class UserPerformance(models.Model):
         all_ids = current_ids.union(new_ids)  # Combine sets to avoid duplicates
         self.watched_video_ids = ';'.join(all_ids)  # Join back to semicolon-separated string
         self.save(update_fields=['watched_video_ids'])
+    def remove_watched_video_ids(self, video_ids_to_remove):
+        current_ids = set(self.get_watched_video_ids())
+        remaining_ids = current_ids - set(video_ids_to_remove)
+        # Save the remaining IDs to the database
+        self.watched_video_ids = ';'.join(remaining_ids)  # Correct assignment, not a function call
+        self.save(update_fields=['watched_video_ids'])
 
     def __str__(self):
         return f"Performance of {self.user.username}"

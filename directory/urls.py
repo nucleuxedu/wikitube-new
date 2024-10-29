@@ -13,4 +13,5 @@ urlpatterns = [
     path('transcript/', VideoTranscriptDetailView.as_view(), name='video_transcript_detail'),
     path('user-performance/', views.UserPerformanceListCreateView.as_view(), name='user-performance-list-create'),
     path('user-performance/<int:pk>/', views.UserPerformanceDetailView.as_view(), name='user-performance-detail'),
+    path('user-performance/<int:pk>/delete-watched-ids/', views.UserPerformanceViewSet.as_view({'post': 'delete_watched_video_ids'}), name='delete-watched-video-ids'),
 ]
