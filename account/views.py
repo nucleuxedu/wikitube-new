@@ -8,6 +8,16 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.hashers import make_password
 from django.core.mail import send_mail
 from django.conf import settings
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import generics, permissions
+from .models import UserProfile
+from .serializers import UserProfileSerializer
+from rest_framework.generics import RetrieveAPIView
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -162,3 +172,57 @@ def password_reset_confirm(request, uidb64, token):
 @permission_classes([IsAuthenticated])
 def get_user_id(request):
     return Response({'user_id': request.user.id}, status=status.HTTP_200_OK)
+
+
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        # Fetch the user profile for the authenticated user
+        return UserProfile.objects.get_or_create(user=self.request.user)[0]
+
+
+class DashboardView(RetrieveAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.userprofile  # Assumes a one-to-one relationship with UserProfile
+
+    def retrieve(self, request, *args, **kwargs):
+        user_profile = self.get_object()
+        serializer = self.get_serializer(user_profile)
+        return Response(serializer.data)
+
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        form = PasswordChangeForm(user=request.user, data=request.data)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            return Response({'detail': 'Password updated successfully'}, status=status.HTTP_200_OK)
+        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+class UserProfileEditView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.userprofile
+
+    def patch(self, request, *args, **kwargs):
+        user_profile = self.get_object()
+        serializer = UserProfileSerializer(user_profile, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+

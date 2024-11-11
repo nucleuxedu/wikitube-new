@@ -168,7 +168,8 @@ class VideoTranscriptSerializer(serializers.ModelSerializer):
 #         total_videos = obj.course.total_videos  
 #         watched_videos = len(obj.get_watched_video_ids())
 #         return (watched_videos / total_videos) * 100 if total_videos > 0 else 0
-
+from rest_framework import serializers
+from .models import UserPerformance  # Import your UserPerformance model
 
 class UserPerformanceSerializer(serializers.ModelSerializer):
     watched_video_ids = serializers.ListField(
@@ -179,7 +180,7 @@ class UserPerformanceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserPerformance
-        fields = ['user', 'course', 'watched_video_ids', 'watched_video_ids_readonly', 'progress']
+        fields = ['user', 'user_id', 'course', 'watched_video_ids', 'watched_video_ids_readonly', 'progress']
 
     def create(self, validated_data):
         watched_video_ids = set(validated_data.pop('watched_video_ids', []))  # Ensure unique IDs
@@ -199,9 +200,54 @@ class UserPerformanceSerializer(serializers.ModelSerializer):
         return obj.get_watched_video_ids()
 
     def get_progress(self, obj):
-        total_videos = obj.course.total_videos  
-        watched_videos = len(obj.get_watched_video_ids())
-        return (watched_videos / total_videos) * 100 if total_videos > 0 else 0
+        watched_videos_count = obj.watched_videos.count()  # Count the watched videos
+        total_videos = obj.course.total_videos if obj.course else 0  # Access total_videos correctly
+
+        # If total_videos is None, default to 0
+        if total_videos is None:
+            total_videos = 0  
+
+        return (watched_videos_count / total_videos) * 100 if total_videos > 0 else 0
+
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['user_id'] = instance.user.id  # Add user ID to the representation
+        return representation
+
+
+# class UserPerformanceSerializer(serializers.ModelSerializer):
+#     watched_video_ids = serializers.ListField(
+#         child=serializers.CharField(), write_only=True, required=False
+#     )
+#     watched_video_ids_readonly = serializers.SerializerMethodField()
+#     progress = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = UserPerformance
+#         fields = ['user', 'course', 'watched_video_ids', 'watched_video_ids_readonly', 'progress']
+
+#     def create(self, validated_data):
+#         watched_video_ids = set(validated_data.pop('watched_video_ids', []))  # Ensure unique IDs
+#         performance = UserPerformance(**validated_data)
+#         performance.save()
+#         performance.set_watched_video_ids(list(watched_video_ids))
+#         return performance
+
+#     def update(self, instance, validated_data):
+#         watched_video_ids = validated_data.pop('watched_video_ids', None)
+#         if watched_video_ids is not None:
+#             instance.set_watched_video_ids(list(set(watched_video_ids)))  # Ensure unique IDs
+#         instance.save()
+#         return instance
+
+#     def get_watched_video_ids_readonly(self, obj):
+#         return obj.get_watched_video_ids()
+
+#     def get_progress(self, obj):
+#         total_videos = obj.course.total_videos  
+#         watched_videos = len(obj.get_watched_video_ids())
+#         return (watched_videos / total_videos) * 100 if total_videos > 0 else 0
 
 
 class VideoPlayerSerializer(serializers.ModelSerializer):

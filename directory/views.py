@@ -13,10 +13,7 @@ from youtube_transcript_api._errors import NoTranscriptFound, TranscriptsDisable
 from .models import VideoTranscript,UserPerformance
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-
-
-
-
+from django.http import Http404
 
 
 
@@ -173,18 +170,112 @@ class UserPerformanceListCreateView(generics.ListCreateAPIView):
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-# View for retrieving and updating specific user performance records
+# # View for retrieving and updating specific user performance records
+# class UserPerformanceDetailView(generics.RetrieveUpdateAPIView):
+#     queryset = UserPerformance.objects.all()
+#     serializer_class = UserPerformanceSerializer
+
+#     def update(self, request, *args, **kwargs):
+#         instance = self.get_object()
+#         serializer = self.get_serializer(instance, data=request.data, partial=True)
+#         serializer.is_valid(raise_exception=True)
+#         self.perform_update(serializer)
+#         return Response(serializer.data)
+
+
+
+# # View for retrieving, updating, or creating user performance records dynamically
+# class UserPerformanceDetailView(generics.RetrieveUpdateAPIView):
+#     serializer_class = UserPerformanceSerializer
+#     #permission_classes = [IsAuthenticated]
+
+#     def get_queryset(self):
+#         # Limit the queryset to the logged-in user's performances
+#         return UserPerformance.objects.filter(user=self.request.user)
+
+#     def retrieve(self, request, *args, **kwargs):
+#         try:
+#             instance = self.get_object()
+#         except Http404:
+#             # If no instance exists, create a new one for the user
+#             course_id = request.data.get('course')  # Assume course ID is provided in the request
+#             instance = UserPerformance.objects.create(user=request.user, course_id=course_id)
+#             instance.save()
+#         serializer = self.get_serializer(instance)
+#         return Response(serializer.data)
+
+#     def update(self, request, *args, **kwargs):
+#         try:
+#             instance = self.get_object()
+#         except Http404:
+#             # If no instance exists, create it dynamically
+#             course_id = request.data.get('course')
+#             instance = UserPerformance.objects.create(user=request.user, course_id=course_id)
+        
+#         # Update watched video IDs if provided
+#         watched_video_ids = request.data.get('watched_video_ids', None)
+#         if watched_video_ids:
+#             instance.set_watched_video_ids(watched_video_ids)
+        
+#         serializer = self.get_serializer(instance, data=request.data, partial=True)
+#         serializer.is_valid(raise_exception=True)
+#         self.perform_update(serializer)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# View for retrieving, updating, or creating user performance records dynamically
 class UserPerformanceDetailView(generics.RetrieveUpdateAPIView):
-    queryset = UserPerformance.objects.all()
     serializer_class = UserPerformanceSerializer
 
+    def get_queryset(self):
+        # Fetch all UserPerformance records, no filtering for authenticated users
+        return UserPerformance.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        # Get the user_id from the request data
+        user_id = request.data.get('user_id')
+        course_id = request.data.get('course_id')  
+
+        if not user_id or not course_id:
+            return Response({"error": "user_id and course_id are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Try to retrieve the existing performance record
+            instance = self.get_queryset().get(user_id=user_id, course_id=course_id)
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        except UserPerformance.DoesNotExist:
+            # If no instance exists, create a new one for the user
+            instance = UserPerformance.objects.create(user_id=user_id, course_id=course_id)
+            instance.save()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     def update(self, request, *args, **kwargs):
-        instance = self.get_object()
+        # Get the user_id and course_id from the request data
+        user_id = request.data.get('user_id')
+        course_id = request.data.get('course_id')  # Assume course ID is provided in the request
+
+        if not user_id or not course_id:
+            return Response({"error": "user_id and course_id are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Try to retrieve the existing performance record
+        try:
+            instance = self.get_queryset().get(user_id=user_id, course_id=course_id)
+        except UserPerformance.DoesNotExist:
+            # If no instance exists, create it dynamically
+            instance = UserPerformance.objects.create(user_id=user_id, course_id=course_id)
+
+        # Update watched video IDs if provided
+        watched_video_ids = request.data.get('watched_video_ids', None)
+        if watched_video_ids:
+            instance.set_watched_video_ids(watched_video_ids)
+
+        # Update other fields if necessary
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        return Response(serializer.data)
-
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserPerformanceViewSet(viewsets.ModelViewSet):
