@@ -103,8 +103,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(source="user.first_name")
     last_name = serializers.CharField(source="user.last_name")
     full_name = serializers.CharField(source="user.get_full_name")
-    phone_number = serializers.CharField(read_only=True)  
-    profile_picture = serializers.ImageField(read_only=True)  
+    phone_number = serializers.CharField()  
+    profile_picture = serializers.ImageField()  
 
     class Meta:
         model = UserProfile
