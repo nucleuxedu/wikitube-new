@@ -104,7 +104,7 @@ import os
 # Use environment variable for flexibility, or set it directly
 DEFAULT_IMAGE_URL = os.getenv(
     'DEFAULT_PROFILE_IMAGE_URL', 
-    'https://lhbowflyvxafohnsdvqf.supabase.co/storage/v1/object/public/images/default-img.png'
+    'https://lhbowflyvxafohnsdvqf.supabase.co/storage/v1/object/public/images/default-user.png'
 )
 
 class UserProfileSerializer(serializers.ModelSerializer):
