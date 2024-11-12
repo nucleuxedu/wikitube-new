@@ -104,7 +104,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(source="user.last_name")
     full_name = serializers.CharField(source="user.get_full_name")
     phone_number = serializers.CharField()  
-    profile_picture = serializers.ImageField()  
+    profile_picture = serializers.ImageField(read_only=True)  
 
     class Meta:
         model = UserProfile
