@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('account', '0005_emailverificationtoken'),
+        ('accounts', '0005_emailverificationtoken'),
     ]
 
     operations = [

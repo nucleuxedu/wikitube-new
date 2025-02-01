@@ -4,6 +4,8 @@ from .models import UserProfile
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
+from .models import UserProfile
+import os
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -12,7 +14,11 @@ class SignUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email', 'password', 'date_of_birth', 'gender')
+        fields = [
+            "first_name", "last_name", "date_of_birth", "gender", "username", "email", "phone_number",
+            "referral", "profession", "university", "expected_graduation_date", "current_area_of_focus",
+            "objectives", "password", "confirm_password"
+        ]
         extra_kwargs = {
             'first_name': {'required': True, 'allow_blank': False},
             'last_name': {'required': True, 'allow_blank': False},
@@ -97,9 +103,7 @@ class LoginSerializer(serializers.Serializer):
 
         return data
 
-from rest_framework import serializers
-from .models import UserProfile
-import os
+
 
 # Use environment variable for flexibility, or set it directly
 DEFAULT_IMAGE_URL = os.getenv(
@@ -155,88 +159,3 @@ class UserProfileSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-# class UserProfileSerializer(serializers.ModelSerializer):
-#     email = serializers.EmailField(source="user.email", read_only=True)
-#     first_name = serializers.CharField(source="user.first_name")
-#     last_name = serializers.CharField(source="user.last_name")
-#     full_name = serializers.CharField(source="user.get_full_name")
-#     phone_number = serializers.CharField()  
-#     profile_picture = serializers.ImageField(read_only=True)  
-
-#     class Meta:
-#         model = UserProfile
-#         fields = [
-#             'user', 'email', 'first_name','last_name','full_name', 'phone_number', 'profile_picture', 
-#             'date_of_birth', 'gender', 'address_line_1', 'address_line_2', 
-#             'city', 'state', 'country'
-#         ]
-#         read_only_fields = ['user', 'email']
-
-#     def create(self, validated_data):
-#         user = self.context['request'].user
-#         validated_data['user'] = user
-#         return super().create(validated_data)
-
-#     def update(self, instance, validated_data):
-#         user_data = validated_data.pop('user', None)
-#         if user_data:
-#             # Update first_name and last_name on the user model
-#             user = instance.user
-#             user.first_name = user_data.get('first_name', user.first_name)
-#             user.last_name = user_data.get('last_name', user.last_name)
-#             user.save()
-
-#         # Update UserProfile fields
-#         for attr, value in validated_data.items():
-#             setattr(instance, attr, value)
-#         instance.save()
-#         return instance
-
-
-# class UserProfileSerializer(serializers.ModelSerializer):
-#     first_name = serializers.CharField(source="user.first_name", read_only=True)
-#     last_name = serializers.CharField(source="user.last_name", read_only=True)
-
-#     class Meta:
-#         model = UserProfile
-#         fields = [
-#             'user', 'first_name', 'last_name', 'date_of_birth', 'gender', 
-#             'address_line_1', 'address_line_2', 'profile_picture', 'phone_number', 
-#             'city', 'state', 'country'
-#         ]
-#         read_only_fields = ['user', 'first_name', 'last_name']
-
-#     def create(self, validated_data):
-#         user = self.context['request'].user
-#         validated_data['user'] = user
-#         return super().create(validated_data)
-
-#     def update(self, instance, validated_data):
-#         user_data = validated_data.pop('user', None)
-#         if user_data:
-#             # Update first_name and last_name on the user model
-#             user = instance.user
-#             user.first_name = user_data.get('first_name', user.first_name)
-#             user.last_name = user_data.get('last_name', user.last_name)
-#             user.save()
-
-#         # Update UserProfile fields
-#         for attr, value in validated_data.items():
-#             setattr(instance, attr, value)
-#         instance.save()
-#         return instance
-
-# class UserProfileSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = UserProfile
-#         fields = [
-#             'user', 'date_of_birth', 'gender', 'address_line_1', 'address_line_2', 
-#             'profile_picture', 'phone_number', 'city', 'state', 'country'
-#         ]
-#         read_only_fields = ['user']
-
-#     def create(self, validated_data):
-#         # Override to automatically set the user on profile creation
-#         user = self.context['request'].user
-#         validated_data['user'] = user
-#         return super().create(validated_data)

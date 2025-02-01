@@ -1,4 +1,4 @@
-# core/admin.py
+
 from django.contrib.admin import AdminSite
 from django.contrib import admin
 from .models import UserProfile

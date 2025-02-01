@@ -12,6 +12,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 DEBUG = os.environ.get('DEBUG') == 'False'
 
+SITE_ID = 1
 
 ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1']
 
@@ -22,16 +23,25 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 ]
 
 THIRD_PARTY_APPS = [
     'phonenumber_field',
     'rest_framework',
     'corsheaders',
+    'rest_framework.authtoken',
+    # Allauth apps
+    
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+
 ]
 
 OUR_APPS = [
-    'account',
+    'accounts',
     'directory',
     
 ]
@@ -47,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -151,9 +162,20 @@ MEDIA_URL = '/media/'
 
 AUTHENTICATION_BACKENDS = [
     'backends.custom_authentication_backend.CustomEmailBackend',  # Custom authentication backend
-    'django.contrib.auth.backends.ModelBackend',  # Keep the default backend
+    'django.contrib.auth.backends.ModelBackend', 
+    "allauth.account.auth_backends.AuthenticationBackend", # Keep the default backend
 ]
-
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+    }
+}
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY"),
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET"),
+SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI")
 # settings.py
 #FRONTEND_URL = 'http://localhost:3000'  # Or your frontend URL
 FRONTEND_URL = 'https://wikitubeio.vercel.app/'

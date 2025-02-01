@@ -16,14 +16,15 @@ Including another URLconf
 from django.urls import include
 from django.contrib import admin
 from django.urls import path
-from account.admin import custom_admin_site
+from accounts.admin import custom_admin_site
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView, TokenRefreshView
 
 urlpatterns = [
     path('custom_admin/', custom_admin_site.urls),
     path('admin/', admin.site.urls),
-    path('api/', include('account.urls')),
+    path("accounts/", include("allauth.urls")),  # Allauth URLs
+    path('api/', include('accounts.urls')),
     path('api/', include('directory.urls')),
     path('api/token/', TokenObtainPairView.as_view()),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
