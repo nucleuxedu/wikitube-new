@@ -167,17 +167,22 @@ AUTHENTICATION_BACKENDS = [
 ]
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
-        "SCOPE": ["profile", "email"],
-        "AUTH_PARAMS": {"access_type": "online"},
+        "APP": {
+            "client_id": os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY"),
+            "secret": os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET"),
+        },
+        "SCOPE": ["email"],
+        "AUTH_PARAMS": {"prompt": "select_account"},
+        "OAUTH_PKCE_ENABLED": True,
     }
 }
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY"),
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET"),
+
+
 SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI")
-# settings.py
-#FRONTEND_URL = 'http://localhost:3000'  # Or your frontend URL
+
 FRONTEND_URL = 'https://wikitubeio.vercel.app/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAIL_BACKEND = "backends.custom_email_backend.CustomEmailBackend"
