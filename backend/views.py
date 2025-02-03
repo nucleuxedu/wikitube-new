@@ -7,7 +7,7 @@ def google_login_redirect(request):
     
     params = {
         "client_id": settings.SOCIALACCOUNT_PROVIDERS["google"]["APP"]["client_id"],
-        "redirect_uri": "http://127.0.0.1:8000/accounts/google/login/callback/",
+        "redirect_uri": "https://wikitube-new.vercel.app/accounts/google/login/callback/",
         "response_type": "code",
         "scope": "email",
         "prompt": "select_account",

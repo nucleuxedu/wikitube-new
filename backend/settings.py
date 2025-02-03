@@ -165,8 +165,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend', 
     "allauth.account.auth_backends.AuthenticationBackend", # Keep the default backend
 ]
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = 'https://wikitubeio.vercel.app/landing'
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -179,6 +178,7 @@ SOCIALACCOUNT_PROVIDERS = {
         "OAUTH_PKCE_ENABLED": True,
     }
 }
+ACCOUNT_ADAPTER = 'backend.adapter.CustomAccountAdapter'
 
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI")
