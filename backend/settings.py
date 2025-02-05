@@ -174,14 +174,18 @@ SOCIALACCOUNT_PROVIDERS = {
             "secret": os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET"),
         },
         "SCOPE": ["email"],
-        "AUTH_PARAMS": {"prompt": "select_account"},
+        'AUTH_PARAMS': {'access_type': 'online'},
+        'METHOD': 'oauth2',
+        'VERIFIED_EMAIL': True,
         "OAUTH_PKCE_ENABLED": True,
     }
 }
-ACCOUNT_ADAPTER = 'backend.adapter.CustomAccountAdapter'
+# ACCOUNT_ADAPTER = 'backend.adapter.CustomAccountAdapter'
+SOCIALACCOUNT_LOGIN_ON_GET=True
+CSRF_COOKIE_NAME = "csrftoken"
+CSRF_COOKIE_SECURE = True
 
-
-SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI")
+SOCIAL_AUTH_GOOGLE_REDIRECT_URI = 'https://wikitube-new.vercel.app/accounts/google/login/callback/'
 
 FRONTEND_URL = 'https://wikitubeio.vercel.app/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
