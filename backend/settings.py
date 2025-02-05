@@ -185,6 +185,10 @@ SOCIALACCOUNT_LOGIN_ON_GET=True
 CSRF_COOKIE_NAME = "csrftoken"
 CSRF_COOKIE_SECURE = True
 SOCIALACCOUNT_AUTO_SIGNUP = True 
+# Require email from Google login
+ACCOUNT_EMAIL_REQUIRED = True  
+ACCOUNT_UNIQUE_EMAIL = True  
+ACCOUNT_AUTHENTICATION_METHOD = "email"  # Login with email instead of username
 
 ACCOUNT_ADAPTER = "backend.adapter.MyAccountAdapter"
 SOCIALACCOUNT_ADAPTER = "backend.adapter.MySocialAccountAdapter"
