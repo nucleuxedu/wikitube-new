@@ -191,7 +191,7 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_AUTHENTICATION_METHOD = "email"  # Login with email instead of username
 
 ACCOUNT_ADAPTER = "backend.adapter.MyAccountAdapter"
-SOCIALACCOUNT_ADAPTER = "backend.adapter.MySocialAdapter"
+SOCIALACCOUNT_ADAPTER = "backend.adapter.MyAccountAdapter"
 
 SOCIAL_AUTH_GOOGLE_REDIRECT_URI = 'https://wikitube-new.vercel.app/accounts/google/login/callback/'
 
