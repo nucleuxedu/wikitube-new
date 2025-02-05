@@ -185,8 +185,9 @@ SOCIALACCOUNT_LOGIN_ON_GET=True
 CSRF_COOKIE_NAME = "csrftoken"
 CSRF_COOKIE_SECURE = True
 SOCIALACCOUNT_AUTO_SIGNUP = True 
-ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
-SOCIALACCOUNT_ADAPTER = "allauth.socialaccount.adapter.DefaultSocialAccountAdapter"
+
+ACCOUNT_ADAPTER = "backend.adapter.MyAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "backend.adapter.MySocialAccountAdapter"
 
 SOCIAL_AUTH_GOOGLE_REDIRECT_URI = 'https://wikitube-new.vercel.app/accounts/google/login/callback/'
 
