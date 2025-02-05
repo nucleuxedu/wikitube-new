@@ -196,6 +196,8 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "your_default_email@gmail.co
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "your_default_password")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
 DEFAULT_FROM_EMAIL ="nucleus.edu.info@gmail.com"
+SOCIALACCOUNT_STORE_TOKENS = True  # Store tokens after login
+
 
 
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
