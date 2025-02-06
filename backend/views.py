@@ -46,3 +46,22 @@ def google_token(request):
     except SocialToken.DoesNotExist:
         print("Error: Token not found for user.")  # Debug: Print error
         return JsonResponse({'error': 'Token not found'}, status=400)
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from dj_rest_auth.registration.views import SocialLoginView
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+
+    def get_response(self):
+        response = super().get_response()
+        user = self.user  # Get the authenticated user
+        token = RefreshToken.for_user(user)  # Generate JWT token
+
+        # Store token in response
+        response.data["token"] = str(token.access_token)
+        return Response(response.data)
