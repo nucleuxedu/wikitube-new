@@ -149,14 +149,7 @@ import datetime
 
 #         # If new user -> Allow Allauth to proceed with account creation
 #         return None
-import datetime
-import jwt
-import random
-from django.utils.text import slugify
-from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-from allauth.socialaccount.models import SocialAccount
-from django.shortcuts import redirect
-from django.conf import settings
+
 
 import datetime
 import jwt
@@ -198,11 +191,21 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
         return new_username
 
     def pre_social_login(self, request, sociallogin):
-        """Allow new users to register and generate token for existing users."""
+        """Fix new user login issues and generate token correctly."""
         user = sociallogin.user
 
+        # ✅ Check if user already exists via email
+        if user.email:
+            existing_user = User.objects.filter(email=user.email).first()
+            if existing_user:
+                sociallogin.connect(request, existing_user)  # Link social account
+                user = existing_user
+            else:
+                # 🔥 New user, allow allauth to create it
+                return None  # Let Allauth handle user creation
+
+        # ✅ If user exists, generate JWT token and redirect
         if user.id:
-            # Existing user -> Generate token
             payload = {
                 "user_id": user.id,
                 "email": user.email,
@@ -214,25 +217,7 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
             response.set_cookie("access_token", token, httponly=True, secure=True, samesite="Lax")
             return response
 
-        # Check if user exists via social account
-        social_account = SocialAccount.objects.filter(uid=sociallogin.account.uid).first()
-        if social_account:
-            user = social_account.user
-            sociallogin.connect(request, user)  # Connect existing social account
-
-            payload = {
-                "user_id": user.id,
-                "email": user.email,
-                "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
-            }
-            token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
-
-            response = redirect(f"https://wikitubeio.vercel.app/landing?token={token}")
-            response.set_cookie("access_token", token, httponly=True, secure=True, samesite="Lax")
-            return response
-
-        # Allow Allauth to handle new user creation
-        return None
+        return None  # Allow new users to be created
 
 import random
 from django.utils.text import slugify
