@@ -111,8 +111,58 @@ DEFAULT_IMAGE_URL = os.getenv(
     'https://lhbowflyvxafohnsdvqf.supabase.co/storage/v1/object/public/images/default-user.png'
 )
 
+# class UserProfileSerializer(serializers.ModelSerializer):
+#     email = serializers.EmailField(source="user.email", read_only=True)
+#     first_name = serializers.CharField(source="user.first_name")
+#     last_name = serializers.CharField(source="user.last_name")
+#     full_name = serializers.CharField(source="user.get_full_name", read_only=True)
+#     phone_number = serializers.CharField()
+#     profile_picture = serializers.ImageField(read_only=True)  # Set as read-only
+
+#     class Meta:
+#         model = UserProfile
+#         fields = [
+#             'user', 'email', 'first_name', 'last_name', 'full_name', 'phone_number',
+#             'profile_picture', 'date_of_birth', 'gender', 'address_line_1', 
+#             'address_line_2', 'city', 'state', 'country'
+#         ]
+#         read_only_fields = ['user', 'email']
+
+#     def to_representation(self, instance):
+#         representation = super().to_representation(instance)
+        
+#         # Use default image URL if profile_picture is not set
+#         if not instance.profile_picture:
+#             representation['profile_picture'] = DEFAULT_IMAGE_URL
+#         else:
+#             representation['profile_picture'] = instance.profile_picture.url
+            
+#         return representation
+
+#     def create(self, validated_data):
+#         user = self.context['request'].user
+#         validated_data['user'] = user
+#         return super().create(validated_data)
+
+#     def update(self, instance, validated_data):
+#         user_data = validated_data.pop('user', None)
+#         if user_data:
+#             # Update first_name and last_name on the user model
+#             user = instance.user
+#             user.first_name = user_data.get('first_name', user.first_name)
+#             user.last_name = user_data.get('last_name', user.last_name)
+#             user.save()
+
+#         # Update UserProfile fields
+#         for attr, value in validated_data.items():
+#             setattr(instance, attr, value)
+#         instance.save()
+#         return instance
+
+from allauth.socialaccount.models import SocialAccount
+
 class UserProfileSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(source="user.email", read_only=True)
+    email = serializers.SerializerMethodField()
     first_name = serializers.CharField(source="user.first_name")
     last_name = serializers.CharField(source="user.last_name")
     full_name = serializers.CharField(source="user.get_full_name", read_only=True)
@@ -127,6 +177,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'address_line_2', 'city', 'state', 'country'
         ]
         read_only_fields = ['user', 'email']
+
+    def get_email(self, obj):
+        # Try to get the email from the user's social account (if it exists)
+        social_account = SocialAccount.objects.filter(user=obj.user).first()
+        if social_account:
+            return social_account.extra_data.get('email', None)  # 'email' key depends on the provider
+        return obj.user.email  # Fallback to the email from the User model
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -158,4 +215,3 @@ class UserProfileSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
-

@@ -183,6 +183,21 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         return UserProfile.objects.get_or_create(user=self.request.user)[0]
 
 
+# class DashboardView(RetrieveAPIView):
+#     serializer_class = UserProfileSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def get_object(self):
+#         return self.request.user.userprofile  # Assumes a one-to-one relationship with UserProfile
+
+#     def retrieve(self, request, *args, **kwargs):
+#         user_profile = self.get_object()
+#         serializer = self.get_serializer(user_profile)
+#         return Response(serializer.data)
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
 class DashboardView(RetrieveAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
