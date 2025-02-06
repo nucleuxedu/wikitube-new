@@ -196,7 +196,8 @@ SOCIALACCOUNT_AUTO_SIGNUP = True
 ACCOUNT_EMAIL_REQUIRED = True  
 ACCOUNT_UNIQUE_EMAIL = True  
 ACCOUNT_AUTHENTICATION_METHOD = "email"  # Login with email instead of username
-
+ACCOUNT_SIGNUP_REDIRECT_URL = "/accounts/google/login/callback/"
+ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
 ACCOUNT_ADAPTER = "backend.adapter.MyAccountAdapter"
 SOCIALACCOUNT_ADAPTER = "backend.adapter.MySocialAccountAdapter"
 
