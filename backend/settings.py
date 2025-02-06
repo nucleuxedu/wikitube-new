@@ -171,8 +171,9 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend', 
     "allauth.account.auth_backends.AuthenticationBackend", # Keep the default backend
 ]
-LOGIN_REDIRECT_URL = "/accounts/google/login/callback/"  # Redirects after login
-ACCOUNT_SIGNUP_REDIRECT_URL = "/accounts/google/login/callback/"
+LOGIN_REDIRECT_URL = "/accounts/google/redirect/"
+ACCOUNT_SIGNUP_REDIRECT_URL = "/accounts/google/redirect/"
+
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {

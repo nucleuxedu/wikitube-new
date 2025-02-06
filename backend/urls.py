@@ -31,7 +31,7 @@ urlpatterns = [
     # path("account/google-login/", google_login_redirect, name="google_login"),  # Allauth URLs
     path('api/google-token/', google_token, name='google-token'),
     path('google/login/', GoogleLogin.as_view(), name='google_login'),
-    path("accounts/google/login/callback/", google_login_redirect, name="google_redirect"),
+    path("accounts/google/redirect/", google_login_redirect, name="google-login-redirect"),
     path('api/', include('accounts.urls')),
     path('api/', include('directory.urls')),
     path('api/token/', TokenObtainPairView.as_view()),
