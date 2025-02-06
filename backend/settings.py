@@ -27,6 +27,8 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
     'phonenumber_field',
     'rest_framework',
     'corsheaders',

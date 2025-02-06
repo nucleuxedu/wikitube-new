@@ -30,3 +30,4 @@ urllib3>=1.26,<3.0
 youtube-transcript-api
 django-allauth
 cryptography
+dj-rest-auth
