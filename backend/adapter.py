@@ -158,40 +158,54 @@ from allauth.socialaccount.models import SocialAccount
 from django.shortcuts import redirect
 from django.conf import settings
 
+import datetime
+import jwt
+import random
+from django.utils.text import slugify
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from allauth.socialaccount.models import SocialAccount
+from django.shortcuts import redirect
+from django.conf import settings
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
 class MySocialAccountAdapter(DefaultSocialAccountAdapter):
     def populate_user(self, request, sociallogin, data):
-        """Auto-populate username from email (before '@') and email from Google."""
+        """Auto-populate username from Google email before @ and ensure uniqueness."""
         user = sociallogin.user
 
-        # Extract email from Google's response
-        google_email = data.get("email")
-
+        google_email = data.get("email")  # Extract email
         if google_email:
+            base_username = google_email.split("@")[0]  # Extract username from email
+            user.username = self.generate_unique_username(base_username)
             user.email = google_email
-            # Extract username from email before '@'
-            user.username = google_email.split("@")[0]
         else:
-            # Fallback if email is missing
             user.username = f"user{random.randint(1000, 9999)}"
 
         return user
 
-    def get_connect_redirect_url(self, request, socialaccount):
-        """Redirect after successful login."""
-        return "https://wikitubeio.vercel.app/landing"
+    def generate_unique_username(self, base_username):
+        """Ensure unique username by appending random digits if needed."""
+        new_username = slugify(base_username)
+
+        if User.objects.filter(username=new_username).exists():
+            while True:
+                random_suffix = random.randint(1000, 9999)
+                unique_username = f"{new_username}{random_suffix}"
+                if not User.objects.filter(username=unique_username).exists():
+                    return unique_username
+        return new_username
 
     def pre_social_login(self, request, sociallogin):
-        """Fix third-party login error for new Google users."""
+        """Allow new users to register and generate token for existing users."""
         user = sociallogin.user
 
-        # Check if a user already exists for this social account
-        existing_social_account = SocialAccount.objects.filter(uid=sociallogin.account.uid).first()
-
-        if existing_social_account:
-            # Existing user: Generate token and redirect
+        if user.id:
+            # Existing user -> Generate token
             payload = {
-                "user_id": existing_social_account.user.id,
-                "email": existing_social_account.user.email,
+                "user_id": user.id,
+                "email": user.email,
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
             }
             token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
@@ -200,8 +214,26 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
             response.set_cookie("access_token", token, httponly=True, secure=True, samesite="Lax")
             return response
 
-        # If new user: Allow Allauth to handle the account creation process
+        # Check if user exists via social account
+        social_account = SocialAccount.objects.filter(uid=sociallogin.account.uid).first()
+        if social_account:
+            user = social_account.user
+            sociallogin.connect(request, user)  # Connect existing social account
+
+            payload = {
+                "user_id": user.id,
+                "email": user.email,
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
+            }
+            token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+
+            response = redirect(f"https://wikitubeio.vercel.app/landing?token={token}")
+            response.set_cookie("access_token", token, httponly=True, secure=True, samesite="Lax")
+            return response
+
+        # Allow Allauth to handle new user creation
         return None
+
 import random
 from django.utils.text import slugify
 from allauth.account.adapter import DefaultAccountAdapter
