@@ -7,6 +7,8 @@ from django.contrib.auth.tokens import default_token_generator
 from .models import UserProfile
 import os
 
+from allauth.socialaccount.models import SocialAccount
+
 
 class SignUpSerializer(serializers.ModelSerializer):
     date_of_birth = serializers.DateField(required=True)
@@ -159,7 +161,6 @@ DEFAULT_IMAGE_URL = os.getenv(
 #         instance.save()
 #         return instance
 
-from allauth.socialaccount.models import SocialAccount
 
 class UserProfileSerializer(serializers.ModelSerializer):
     email = serializers.SerializerMethodField()
@@ -167,24 +168,46 @@ class UserProfileSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(source="user.last_name")
     full_name = serializers.CharField(source="user.get_full_name", read_only=True)
     phone_number = serializers.CharField()
-    profile_picture = serializers.ImageField(read_only=True)  # Set as read-only
+    profile_picture = serializers.ImageField(read_only=True) 
+    google_data = serializers.SerializerMethodField()
+    google_email = serializers.SerializerMethodField()  # Set as read-only
 
     class Meta:
         model = UserProfile
         fields = [
-            'user', 'email', 'first_name', 'last_name', 'full_name', 'phone_number',
+            'user', 'email','google_email', 'first_name', 'last_name', 'full_name', 'phone_number',
             'profile_picture', 'date_of_birth', 'gender', 'address_line_1', 
-            'address_line_2', 'city', 'state', 'country'
+            'address_line_2', 'city', 'state', 'country','google_data'
         ]
         read_only_fields = ['user', 'email']
 
     def get_email(self, obj):
-        # Try to get the email from the user's social account (if it exists)
-        social_account = SocialAccount.objects.filter(user=obj.user).first()
-        if social_account:
-            return social_account.extra_data.get('email', None)  # 'email' key depends on the provider
-        return obj.user.email  # Fallback to the email from the User model
+        return obj.user.email  # Default Django user email
 
+    def get_google_email(self, obj):
+        try:
+            social_account = SocialAccount.objects.get(user=obj.user, provider='google')
+            email = social_account.extra_data.get('email')
+            if email:
+                return email
+        except SocialAccount.DoesNotExist:
+            pass
+        return None
+
+    def get_google_data(self, obj):
+        try:
+            social_account = SocialAccount.objects.get(user=obj.user, provider='google')
+            return {
+                'id': social_account.uid,
+                'email': social_account.extra_data.get('email'),  # Include email here too
+                'picture': social_account.extra_data.get('picture'),
+                'given_name': social_account.extra_data.get('given_name'),
+                'family_name': social_account.extra_data.get('family_name'),
+                'locale': social_account.extra_data.get('locale'),
+                'verified_email': social_account.extra_data.get('verified_email', False),
+            }
+        except SocialAccount.DoesNotExist:
+            return None
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         

@@ -194,23 +194,49 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 #         user_profile = self.get_object()
 #         serializer = self.get_serializer(user_profile)
 #         return Response(serializer.data)
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
+
+
+from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from allauth.socialaccount.models import SocialAccount
+from django.shortcuts import get_object_or_404
 
 class DashboardView(RetrieveAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        return self.request.user.userprofile  # Assumes a one-to-one relationship with UserProfile
+        return get_object_or_404(UserProfile, user=self.request.user)
 
     def retrieve(self, request, *args, **kwargs):
         user_profile = self.get_object()
         serializer = self.get_serializer(user_profile)
-        return Response(serializer.data)
+        
+        # Get the serialized data
+        data = serializer.data
+        
+        # Add additional Google account details if available
+        try:
+            social_account = SocialAccount.objects.get(
+                user=request.user, 
+                provider='google'
+            )
+            
+            # Add specific Google account information
+            data['social_account'] = {
+                'is_google_connected': True,
+                'google_email': social_account.extra_data.get('email'),
+                'account_id': social_account.uid,
+                'last_login': social_account.last_login,
+                'date_joined': social_account.date_joined,
+            }
+        except SocialAccount.DoesNotExist:
+            data['social_account'] = {
+                'is_google_connected': False
+            }
 
-
+        return Response(data)
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
 
