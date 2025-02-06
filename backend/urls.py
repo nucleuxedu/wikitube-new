@@ -20,7 +20,7 @@ from accounts.admin import custom_admin_site
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView, TokenRefreshView
 
-from backend.views import GoogleLogin, google_token
+from backend.views import GoogleLogin, google_login_redirect, google_token
 
 # from backend.views import  google_login_redirect
 
@@ -31,6 +31,7 @@ urlpatterns = [
     # path("account/google-login/", google_login_redirect, name="google_login"),  # Allauth URLs
     path('api/google-token/', google_token, name='google-token'),
     path('google/login/', GoogleLogin.as_view(), name='google_login'),
+    path("accounts/google/login/callback/", google_login_redirect, name="google_redirect"),
     path('api/', include('accounts.urls')),
     path('api/', include('directory.urls')),
     path('api/token/', TokenObtainPairView.as_view()),

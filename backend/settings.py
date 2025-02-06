@@ -132,6 +132,10 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
+CSRF_TRUSTED_ORIGINS = [
+    "https://wikitubeio.vercel.app",
+    "https://wikitube-new.vercel.app"
+]
 
 # SIMPLE_JWT = {
 #     'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
@@ -167,7 +171,8 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend', 
     "allauth.account.auth_backends.AuthenticationBackend", # Keep the default backend
 ]
-LOGIN_REDIRECT_URL = 'https://wikitubeio.vercel.app/landing'
+LOGIN_REDIRECT_URL = "/accounts/google/login/callback/"  # Redirects after login
+ACCOUNT_SIGNUP_REDIRECT_URL = "/accounts/google/login/callback/"
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {

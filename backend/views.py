@@ -65,3 +65,28 @@ class GoogleLogin(SocialLoginView):
         # Store token in response
         response.data["token"] = str(token.access_token)
         return Response(response.data)
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
+import jwt  # Ensure you have PyJWT installed: pip install PyJWT
+
+@login_required
+def google_login_redirect(request):
+    """
+    Redirect authenticated users to the frontend landing page after Google login.
+    """
+    user = request.user
+    if user.is_authenticated:
+        # Generate a JWT token (you can use Django's session or a custom token)
+        payload = {
+            "user_id": user.id,
+            "email": user.email
+        }
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+
+        # Create the response and set the token in a cookie
+        response = redirect("https://wikitubeio.vercel.app/landing?token=" + token)
+        response.set_cookie("access_token", token, httponly=True, secure=True, samesite="Lax")
+        return response
+
+    return redirect("/accounts/login/")
