@@ -163,6 +163,72 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+# class MySocialAccountAdapter(DefaultSocialAccountAdapter):
+#     def populate_user(self, request, sociallogin, data):
+#         """Auto-populate username from Google email before @ and ensure uniqueness."""
+#         user = sociallogin.user
+
+#         google_email = data.get("email")  # Extract email
+#         if google_email:
+#             base_username = google_email.split("@")[0]  # Extract username from email
+#             user.username = self.generate_unique_username(base_username)
+#             user.email = google_email
+#         else:
+#             user.username = f"user{random.randint(1000, 9999)}"
+
+#         return user
+
+#     def generate_unique_username(self, base_username):
+#         """Ensure unique username by appending random digits if needed."""
+#         new_username = slugify(base_username)
+
+#         if User.objects.filter(username=new_username).exists():
+#             while True:
+#                 random_suffix = random.randint(1000, 9999)
+#                 unique_username = f"{new_username}{random_suffix}"
+#                 if not User.objects.filter(username=unique_username).exists():
+#                     return unique_username
+#         return new_username
+
+#     def pre_social_login(self, request, sociallogin):
+#         """Fix new user login issues and generate token correctly."""
+#         user = sociallogin.user
+
+#         # ✅ Check if user already exists via email
+#         if user.email:
+#             existing_user = User.objects.filter(email=user.email).first()
+#             if existing_user:
+#                 sociallogin.connect(request, existing_user)  # Link social account
+#                 user = existing_user
+#             else:
+#                 # 🔥 New user, allow allauth to create it
+#                 return None  # Let Allauth handle user creation
+
+#         # ✅ If user exists, generate JWT token and redirect
+#         if user.id:
+#             payload = {
+#                 "user_id": user.id,
+#                 "email": user.email,
+#                 "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
+#             }
+#             token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+
+#             response = redirect(f"https://wikitubeio.vercel.app/landing?token={token}")
+#             response.set_cookie("access_token", token, httponly=True, secure=True, samesite="Lax")
+#             return response
+
+#         return None  # Allow new users to be created
+import datetime
+import jwt
+import random
+from django.utils.text import slugify
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from django.shortcuts import redirect
+from django.conf import settings
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
 class MySocialAccountAdapter(DefaultSocialAccountAdapter):
     def populate_user(self, request, sociallogin, data):
         """Auto-populate username from Google email before @ and ensure uniqueness."""
@@ -194,17 +260,18 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
         """Fix new user login issues and generate token correctly."""
         user = sociallogin.user
 
-        # ✅ Check if user already exists via email
+        # Check if the user already exists via email
         if user.email:
             existing_user = User.objects.filter(email=user.email).first()
             if existing_user:
-                sociallogin.connect(request, existing_user)  # Link social account
+                # Link social account to existing user
+                sociallogin.connect(request, existing_user)
                 user = existing_user
             else:
-                # 🔥 New user, allow allauth to create it
+                # New user, allow Allauth to create the user
                 return None  # Let Allauth handle user creation
 
-        # ✅ If user exists, generate JWT token and redirect
+        # If user exists (after user creation), generate JWT token and redirect
         if user.id:
             payload = {
                 "user_id": user.id,
@@ -217,7 +284,8 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
             response.set_cookie("access_token", token, httponly=True, secure=True, samesite="Lax")
             return response
 
-        return None  # Allow new users to be created
+        return None  # Return None to let Allauth handle new user creation automatically
+
 
 import random
 from django.utils.text import slugify
