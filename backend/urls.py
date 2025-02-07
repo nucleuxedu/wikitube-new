@@ -29,10 +29,9 @@ urlpatterns = [
     path('custom_admin/', custom_admin_site.urls),
     path('admin/', admin.site.urls),
     path("accounts/", include("allauth.urls")),
-    path("account/google-login/", google_login_redirect, name="google_login"),  # Allauth URLs
     path('api/google-token/', google_token, name='google-token'),
     path('google/login/', GoogleLogin.as_view(), name='google_login'),
-    # path("accounts/google/redirect/", google_login_redirect, name="google-login-redirect"),
+    path("accounts/google/redirect/", google_login_redirect, name="google-login-redirect"),
     path('accounts/google/login/callback/', 
          CustomGoogleCallbackView.adapter_view(GoogleOAuth2Adapter),
          name='google_callback'),
