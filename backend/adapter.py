@@ -197,6 +197,7 @@ from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.shortcuts import redirect
 from django.conf import settings
 from django.contrib.auth import get_user_model, login
+from django.contrib.auth import authenticate
 from django.utils.text import slugify
 import datetime
 import jwt
@@ -243,6 +244,11 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
                 sociallogin.connect(request, existing_user)
                 user = existing_user
                 
+                # Get the authentication backend
+                backend = 'django.contrib.auth.backends.ModelBackend'
+                # Log the user in with the specified backend
+                login(request, user, backend=backend)
+                
                 # Generate and set token for existing user
                 token = self._generate_token(user)
                 return self._create_redirect_response(token)
@@ -263,7 +269,7 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
 
     def _create_redirect_response(self, token):
         """Create redirect response with token."""
-        frontend_url = "https://wikitubeio.vercel.app"  # Hardcoded correct frontend URL
+        frontend_url = "https://wikitubeio.vercel.app"
         response = redirect(f"{frontend_url}/landing?token={token}")
         response.set_cookie(
             "access_token",
@@ -279,8 +285,11 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
         """Handle new user creation and immediate redirect."""
         user = super().save_user(request, sociallogin, form)
         
-        # Ensure user is logged in
-        login(request, user)
+        # Specify the authentication backend
+        backend = 'django.contrib.auth.backends.ModelBackend'
+        
+        # Log the user in with the specified backend
+        login(request, user, backend=backend)
         
         # Generate token and redirect
         token = self._generate_token(user)
