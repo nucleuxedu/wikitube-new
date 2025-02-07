@@ -192,7 +192,7 @@ SOCIALACCOUNT_PROVIDERS = {
 SOCIALACCOUNT_LOGIN_ON_GET=True
 CSRF_COOKIE_NAME = "csrftoken"
 CSRF_COOKIE_SECURE = True
-SOCIALACCOUNT_AUTO_SIGNUP = True 
+
 SOCIALACCOUNT_QUERY_EMAIL = True
 # Require email from Google login
 ACCOUNT_EMAIL_REQUIRED = True  
@@ -203,13 +203,37 @@ ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
 ACCOUNT_ADAPTER = "backend.adapter.MyAccountAdapter"
 SOCIALACCOUNT_ADAPTER = "backend.adapter.MySocialAccountAdapter"
 
-ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
-SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
-ACCOUNT_EMAIL_VERIFICATION = "none"
+
+
 
 SOCIAL_AUTH_GOOGLE_REDIRECT_URI = 'https://wikitube-new.vercel.app/accounts/google/login/callback/'
 
-FRONTEND_URL = 'https://wikitubeio.vercel.app/'
+
+
+# Frontend URL
+FRONTEND_URL = 'https://wikitubeio.vercel.app'
+
+# Authentication settings
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+
+# Security settings
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = [
+    'https://wikitubeio.vercel.app',
+    'https://wikitube-new.vercel.app'  # Include both domains for safety
+]
+
+# Additional settings
+SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_LOGOUT_ON_GET = True
+
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAIL_BACKEND = "backends.custom_email_backend.CustomEmailBackend"
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
