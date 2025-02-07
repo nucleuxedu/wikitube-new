@@ -96,24 +96,76 @@ from django.conf import settings
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 
-@login_required
-def google_login_redirect(request):
-    """
-    Redirect authenticated users to the frontend landing page after Google login.
-    """
-    user = request.user
-    if user.is_authenticated:
-        # Generate a JWT token with expiration
-        payload = {
-            "user_id": user.id,
-            "email": user.email,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),  # 7-day expiration
-        }
-        token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+# @login_required
+# def google_login_redirect(request):
+#     """
+#     Redirect authenticated users to the frontend landing page after Google login.
+#     """
+#     user = request.user
+#     if user.is_authenticated:
+#         # Generate a JWT token with expiration
+#         payload = {
+#             "user_id": user.id,
+#             "email": user.email,
+#             "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),  # 7-day expiration
+#         }
+#         token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
 
-        # Create the response and set the token in a cookie
-        response = redirect(f"https://wikitubeio.vercel.app/landing?token={token}")
-        response.set_cookie("access_token", token, httponly=True, secure=True, samesite="Lax")
-        return response
+#         # Create the response and set the token in a cookie
+#         response = redirect(f"https://wikitubeio.vercel.app/landing?token={token}")
+#         response.set_cookie("access_token", token, httponly=True, secure=True, samesite="Lax")
+#         return response
 
-    return redirect("/accounts/login/")
+#     return redirect("/accounts/login/")
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.views import OAuth2CallbackView
+from allauth.socialaccount.helpers import complete_social_login
+from allauth.socialaccount.models import SocialLogin
+from django.shortcuts import redirect
+from django.contrib.auth import login
+import datetime
+import jwt
+from django.conf import settings
+
+class CustomGoogleCallbackView(OAuth2CallbackView):
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            # Get the social login from the request
+            social_login = self.get_social_login(request)
+            social_login.state['process'] = 'connect'
+            
+            # Complete the login process
+            ret = complete_social_login(request, social_login)
+            
+            if isinstance(ret, SocialLogin):
+                # Login was successful, generate token
+                user = ret.user
+                
+                # Generate JWT token
+                payload = {
+                    "user_id": user.id,
+                    "email": user.email,
+                    "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
+                    "iat": datetime.datetime.utcnow(),
+                }
+                token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+                
+                # Create redirect response
+                frontend_url = "https://wikitubeio.vercel.app"
+                response = redirect(f"{frontend_url}/landing?token={token}")
+                response.set_cookie(
+                    "access_token",
+                    token,
+                    httponly=True,
+                    secure=True,
+                    samesite="Lax",
+                    max_age=7 * 24 * 60 * 60
+                )
+                return response
+            
+            return ret
+            
+        except Exception as e:
+            # Log the error and redirect to frontend with error parameter
+            frontend_url = "https://wikitubeio.vercel.app"
+            return redirect(f"{frontend_url}/landing?error=auth_failed")
