@@ -171,7 +171,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend', 
     "allauth.account.auth_backends.AuthenticationBackend", # Keep the default backend
 ]
-LOGIN_REDIRECT_URL = "/accounts/google/redirect/"
+# LOGIN_REDIRECT_URL = "/accounts/google/redirect/"
 ACCOUNT_SIGNUP_REDIRECT_URL = "/accounts/google/redirect/"
 
 
@@ -191,20 +191,45 @@ SOCIALACCOUNT_PROVIDERS = {
 # ACCOUNT_ADAPTER = 'backend.adapter.CustomAccountAdapter'
 SOCIALACCOUNT_LOGIN_ON_GET=True
 CSRF_COOKIE_NAME = "csrftoken"
-CSRF_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
 
-SOCIALACCOUNT_QUERY_EMAIL = True
-# Require email from Google login
-ACCOUNT_EMAIL_REQUIRED = True  
-ACCOUNT_UNIQUE_EMAIL = True  
-ACCOUNT_AUTHENTICATION_METHOD = "email"  # Login with email instead of username
-ACCOUNT_SIGNUP_REDIRECT_URL = "/accounts/google/login/callback/"
+# SOCIALACCOUNT_QUERY_EMAIL = True
+# # Require email from Google login
+# ACCOUNT_EMAIL_REQUIRED = True  
+# ACCOUNT_UNIQUE_EMAIL = True  
+# ACCOUNT_AUTHENTICATION_METHOD = "email"  # Login with email instead of username
+# ACCOUNT_SIGNUP_REDIRECT_URL = "/accounts/google/login/callback/"
 ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
 ACCOUNT_ADAPTER = "backend.adapter.MyAccountAdapter"
 SOCIALACCOUNT_ADAPTER = "backend.adapter.MySocialAccountAdapter"
 
 
+# Social Auth settings
+SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_AUTO_SIGNUP = True
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 
+# Session settings
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 7 days
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# Redirect URLs
+LOGIN_REDIRECT_URL = "https://wikitubeio.vercel.app/landing"
+ACCOUNT_LOGOUT_REDIRECT_URL = "https://wikitubeio.vercel.app"
+
+# CSRF settings
+CSRF_TRUSTED_ORIGINS = [
+    'https://wikitubeio.vercel.app',
+    'https://wikitube-new.vercel.app'
+]
 
 SOCIAL_AUTH_GOOGLE_REDIRECT_URI = 'https://wikitube-new.vercel.app/accounts/google/login/callback/'
 

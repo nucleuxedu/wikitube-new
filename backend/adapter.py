@@ -197,8 +197,9 @@ from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.shortcuts import redirect
 from django.conf import settings
 from django.contrib.auth import get_user_model, login
-from django.contrib.auth import authenticate
 from django.utils.text import slugify
+from allauth.account.utils import perform_login
+from allauth.socialaccount.helpers import complete_social_login
 import datetime
 import jwt
 import random
@@ -215,10 +216,13 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
             base_username = google_email.split("@")[0]
             user.username = self.generate_unique_username(base_username)
             user.email = google_email
+            # Ensure the user is active and has required fields
+            user.is_active = True
+            if not user.password:
+                user.set_unusable_password()
         else:
             user.username = f"user{random.randint(1000, 9999)}"
         
-        user.is_active = True
         return user
     
     def generate_unique_username(self, base_username):
@@ -237,25 +241,33 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
         """Handle social login flow and token generation."""
         user = sociallogin.user
         
-        # Check if user exists by email
-        if user.email:
-            existing_user = User.objects.filter(email=user.email).first()
-            if existing_user:
-                sociallogin.connect(request, existing_user)
-                user = existing_user
-                
-                # Get the authentication backend
-                backend = 'django.contrib.auth.backends.ModelBackend'
-                # Log the user in with the specified backend
-                login(request, user, backend=backend)
-                
-                # Generate and set token for existing user
-                token = self._generate_token(user)
-                return self._create_redirect_response(token)
+        try:
+            # Check if user exists by email
+            if user.email:
+                existing_user = User.objects.filter(email=user.email).first()
+                if existing_user:
+                    # Connect the social account to the existing user
+                    sociallogin.connect(request, existing_user)
+                    
+                    # Generate token
+                    token = self._generate_token(existing_user)
+                    
+                    # Create redirect response
+                    return self._create_redirect_response(token)
             
-        # For new users, store email in session for later use
-        request.session['pending_email'] = user.email
-        return None
+            # For new users, complete the social login process
+            complete_social_login(request, sociallogin)
+            
+            # Generate token for the new user
+            token = self._generate_token(sociallogin.user)
+            
+            # Create redirect response
+            return self._create_redirect_response(token)
+            
+        except Exception as e:
+            # Log the error if needed
+            print(f"Error in pre_social_login: {str(e)}")
+            return None
 
     def _generate_token(self, user):
         """Generate JWT token for user."""
@@ -285,10 +297,12 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
         """Handle new user creation and immediate redirect."""
         user = super().save_user(request, sociallogin, form)
         
-        # Specify the authentication backend
-        backend = 'django.contrib.auth.backends.ModelBackend'
+        # Ensure the user is properly saved and active
+        user.is_active = True
+        user.save()
         
-        # Log the user in with the specified backend
+        # Use the custom email backend
+        backend = 'backends.custom_authentication_backend.CustomEmailBackend'
         login(request, user, backend=backend)
         
         # Generate token and redirect
