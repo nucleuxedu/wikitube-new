@@ -203,6 +203,10 @@ ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
 ACCOUNT_ADAPTER = "backend.adapter.MyAccountAdapter"
 SOCIALACCOUNT_ADAPTER = "backend.adapter.MySocialAccountAdapter"
 
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_EMAIL_VERIFICATION = "none"
+
 SOCIAL_AUTH_GOOGLE_REDIRECT_URI = 'https://wikitube-new.vercel.app/accounts/google/login/callback/'
 
 FRONTEND_URL = 'https://wikitubeio.vercel.app/'
