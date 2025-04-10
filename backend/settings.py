@@ -82,17 +82,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# import dj_database_url
 
-# DATABASES = {
-#     "default": dj_database_url.config(default=os.environ.get('POSTGRES_URL'))
-# }
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -137,11 +127,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://wikitube-new.vercel.app"
 ]
 
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
-#     'AUTH_HEADER_TYPES': ('Bearer',),
-#     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-# }
+
 ADMIN_SITE_HEADER = 'WIKITUBE ADMIN'
 ADMIN_SITE_TITLE = 'WIKITUBE'
 ADMIN_INDEX_TITLE = 'Welcome to WIKITUBE'
@@ -189,8 +175,8 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 # ACCOUNT_ADAPTER = 'backend.adapter.CustomAccountAdapter'
-SOCIALACCOUNT_LOGIN_ON_GET=True
-CSRF_COOKIE_NAME = "csrftoken"
+
+
 # CSRF_COOKIE_SECURE = True
 
 # SOCIALACCOUNT_QUERY_EMAIL = True
@@ -198,14 +184,13 @@ CSRF_COOKIE_NAME = "csrftoken"
 # ACCOUNT_EMAIL_REQUIRED = True  
 # ACCOUNT_UNIQUE_EMAIL = True  
 # ACCOUNT_AUTHENTICATION_METHOD = "email"  # Login with email instead of username
-# ACCOUNT_SIGNUP_REDIRECT_URL = "/accounts/google/login/callback/"
+ACCOUNT_SIGNUP_REDIRECT_URL = "/accounts/google/redirect/"
 ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
 ACCOUNT_ADAPTER = "backend.adapter.MyAccountAdapter"
 SOCIALACCOUNT_ADAPTER = "backend.adapter.MySocialAccountAdapter"
 
 
 # Social Auth settings
-SOCIALACCOUNT_LOGIN_ON_GET = True
 ACCOUNT_LOGOUT_ON_GET = True
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
@@ -215,14 +200,14 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
 SOCIALACCOUNT_AUTO_SIGNUP = True
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
-
+CSRF_COOKIE_NAME = "csrftoken"
 # Session settings
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 7 days
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 # Redirect URLs
-LOGIN_REDIRECT_URL = "https://wikitubeio.vercel.app/landing"
+LOGIN_REDIRECT_URL = "/accounts/google/redirect/"
 ACCOUNT_LOGOUT_REDIRECT_URL = "https://wikitubeio.vercel.app"
 
 # CSRF settings
@@ -256,7 +241,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Additional settings
 SOCIALACCOUNT_LOGIN_ON_GET = True
-ACCOUNT_LOGOUT_ON_GET = True
+
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

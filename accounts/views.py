@@ -17,8 +17,9 @@ from rest_framework import generics, permissions
 from .models import UserProfile
 from .serializers import UserProfileSerializer
 from rest_framework.generics import RetrieveAPIView
-from rest_framework.permissions import IsAuthenticated
 
+from allauth.socialaccount.models import SocialAccount
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
@@ -196,11 +197,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 #         return Response(serializer.data)
 
 
-from rest_framework.generics import RetrieveAPIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from allauth.socialaccount.models import SocialAccount
-from django.shortcuts import get_object_or_404
+
 
 class DashboardView(RetrieveAPIView):
     serializer_class = UserProfileSerializer

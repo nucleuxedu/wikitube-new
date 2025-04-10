@@ -168,8 +168,7 @@ class VideoTranscriptSerializer(serializers.ModelSerializer):
 #         total_videos = obj.course.total_videos  
 #         watched_videos = len(obj.get_watched_video_ids())
 #         return (watched_videos / total_videos) * 100 if total_videos > 0 else 0
-from rest_framework import serializers
-from .models import UserPerformance  # Import your UserPerformance model
+# Import your UserPerformance model
 
 class UserPerformanceSerializer(serializers.ModelSerializer):
     watched_video_ids = serializers.ListField(

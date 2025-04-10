@@ -21,15 +21,13 @@ from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView, TokenRefreshView
 
-from backend.views import CustomGoogleCallbackView, GoogleLogin, google_login_redirect,  google_token
+from backend.views import CustomGoogleCallbackView, GoogleLogin, google_login_redirect
 
-# from backend.views import  google_login_redirect
 
 urlpatterns = [
     path('custom_admin/', custom_admin_site.urls),
     path('admin/', admin.site.urls),
     path("accounts/", include("allauth.urls")),
-    path('api/google-token/', google_token, name='google-token'),
     path('google/login/', GoogleLogin.as_view(), name='google_login'),
     path("accounts/google/redirect/", google_login_redirect, name="google-login-redirect"),
     path('accounts/google/login/callback/', 
