@@ -14,7 +14,7 @@ DEBUG = os.environ.get('DEBUG') == 'False'
 
 SITE_ID = 1
 
-ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1','*']
 
 DJANGO_APPS = [
     'django.contrib.admin',
@@ -122,10 +122,7 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
-CSRF_TRUSTED_ORIGINS = [
-    "https://wikitubeio.vercel.app",
-    "https://wikitube-new.vercel.app"
-]
+
 
 
 ADMIN_SITE_HEADER = 'WIKITUBE ADMIN'
@@ -144,7 +141,9 @@ CORS_ALLOWED_ORIGINS = [
     "https://wikitubeio-backend-nsq354vwx-revathi-ks-projects.vercel.app",
     "https://wikitubeio.vercel.app",
     'http://localhost:3000',
-    'http://127.0.0.1:3000'
+    'http://127.0.0.1:3000',
+    'http://localhost:8081',
+    'exp://192.168.31.125:8081'
 ]
 
 STATIC_URL = '/static/'
@@ -213,7 +212,9 @@ ACCOUNT_LOGOUT_REDIRECT_URL = "https://wikitubeio.vercel.app"
 # CSRF settings
 CSRF_TRUSTED_ORIGINS = [
     'https://wikitubeio.vercel.app',
-    'https://wikitube-new.vercel.app'
+    'https://wikitube-new.vercel.app',
+    'http://localhost:8081',
+    'exp://192.168.31.125:8081'
 ]
 
 SOCIAL_AUTH_GOOGLE_REDIRECT_URI = 'https://wikitube-new.vercel.app/accounts/google/login/callback/'
@@ -236,7 +237,9 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = [
     'https://wikitubeio.vercel.app',
-    'https://wikitube-new.vercel.app'  # Include both domains for safety
+    'https://wikitube-new.vercel.app',
+    'http://localhost:8081',
+    'exp://192.168.31.125:8081'  # Include both domains for safety
 ]
 
 # Additional settings
