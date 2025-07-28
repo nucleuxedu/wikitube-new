@@ -4,4 +4,6 @@ db.sqlite3
 env-gcp
 directory/models2.py
 downloads
+__pycache__
+*.py[cod]
 

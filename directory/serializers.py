@@ -25,7 +25,7 @@ class CourseSerializer(serializers.ModelSerializer):
                 progress = (watched_videos_count / total_videos_count) * 100 if total_videos_count > 0 else 0
                 return {
                     "user": user.id,
-                    "watched_videos": list(performance.watched_videos.values_list('id', flat=True)),
+                    "watched_videos": list(performance.watched_videos.values_list('video_played_id', flat=True)),
                     "progress": progress
                 }
             else:
