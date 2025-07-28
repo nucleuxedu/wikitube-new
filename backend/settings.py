@@ -143,7 +143,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'http://localhost:8081',
-    'exp://192.168.31.125:8081'
+    'exp://192.168.31.125:8081',
+    'https://wikitube-new-olive.vercel.app'
 ]
 
 STATIC_URL = '/static/'
@@ -239,7 +240,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://wikitubeio.vercel.app',
     'https://wikitube-new.vercel.app',
     'http://localhost:8081',
-    'exp://192.168.31.125:8081'  # Include both domains for safety
+    'exp://192.168.31.125:8081',
+    'https://wikitube-new-olive.vercel.app' # Include both domains for safety
 ]
 
 # Additional settings
